@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akinator Prototype</title>
+    <title>Guess the Character Game</title>
     <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
     <div id="game-container">
-        <h1>Akinator Game</h1>
+        <h1>Guess the Character Game</h1>
         <div id="question-box"></div>
         <div id="response-box">
-            <button onclick="submitAnswer('Yes')">Yes</button>
-            <button onclick="submitAnswer('No')">No</button>
+            <button id="yes-button" onclick="submitAnswer('Yes')">Yes</button>
+            <button id="no-button" onclick="submitAnswer('No')">No</button>
         </div>
         <div id="result"></div>
     </div>
