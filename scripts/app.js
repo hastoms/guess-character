@@ -1,7 +1,9 @@
 let session_id = null;
 let question_order = 0;
-let currentQuestionId = null;  // Track current question ID
 let character_guess = null;
+let currentQuestionId = null;
+let character_show = null;
+let image_url = null;  // Add a variable to track the image URL
 
 function startGame() {
     fetch('https://cmxsilzill.execute-api.us-east-1.amazonaws.com/dev/start_game3', {
@@ -14,13 +16,30 @@ function startGame() {
     .then(response => response.json())
     .then(data => {
         session_id = data.session_id;
-        currentQuestionId = data.question_id;  // Set initial question ID
+        question_order = 0;  // Reset question order
+        currentQuestionId = data.question_id;  // Set the first question's ID
         displayQuestion(data.question_text);
+        displayResponseButtons();  // Show buttons for Yes, No, and Don't Know
+    })
+    .catch(error => {
+        console.error('Error starting the game:', error);
     });
 }
 
 function displayQuestion(question) {
     document.getElementById('question-box').innerHTML = `<h2>${question}</h2>`;
+}
+
+function displayResponseButtons() {
+    document.getElementById('response-box').innerHTML = `
+        <button id="yes-button" onclick="submitAnswer('Yes')">Yes</button>
+        <button id="no-button" onclick="submitAnswer('No')">No</button>
+        <button id="dont-know-button" onclick="submitAnswer('Dont Know')">Don't Know</button>
+    `;
+    const responseBox = document.getElementById('response-box');
+    responseBox.style.display = 'flex';
+    responseBox.style.justifyContent = 'center';
+    responseBox.style.gap = '20px';  // Adds spacing between buttons
 }
 
 function submitAnswer(answer) {
@@ -33,32 +52,83 @@ function submitAnswer(answer) {
             },
             body: JSON.stringify({
                 session_id: session_id,
-                question_id: currentQuestionId,  // Use the tracked question ID
+                question_id: currentQuestionId,
                 user_response: answer,
                 question_order: question_order
             })
         })
         .then(response => response.json())
         .then(data => {
-            if (data.guessed_character) {
-                // The game is guessing the character
+            if (data.message === 'stumped') {
+                // Display the "stumped" form when no eligible characters remain
+                displayStumpedForm(data.prompt);
+            } else if (data.guessed_character) {
+                // Display guessed character, character show, and image if available
                 character_guess = data.guessed_character;
-                displayGuess(character_guess);
-            } else if (data.next_question) {
-                // Continue with the next question
-                currentQuestionId = data.next_question.question_id;  // Update to the next question ID
+                character_show = data.character_show;
+                image_url = data.image_url ? data.image_url : null;
+
+                document.getElementById('question-box').innerHTML = `
+                    <h2>Are you ${character_guess} from ${character_show}?</h2>
+                    ${image_url ? `<div id="image-container" style="text-align: center;">
+                        <img src="${image_url}" alt="Character Image" style="width: 200px; height: 200px; object-fit: cover;">
+                    </div>` : ''}
+                `;
+
+                document.getElementById('response-box').innerHTML = `
+                    <button id="correct-button" onclick="submitGuessResponse(true)">Correct</button>
+                    <button id="incorrect-button" onclick="submitGuessResponse(false)">Incorrect</button>
+                `;
+            } else {
+                // Continue asking questions
                 displayQuestion(data.next_question.question_text);
+                currentQuestionId = data.next_question.question_id;  // Update to the new question ID
             }
+        })
+        .catch(error => {
+            console.error('Error submitting answer:', error);
         });
     }
 }
 
-function displayGuess(character) {
-    document.getElementById('question-box').innerHTML = `<h2>Are you ${character}?</h2>`;
+function displayStumpedForm(promptMessage) {
+    document.getElementById('question-box').innerHTML = `<h2>${promptMessage}</h2>`;
     document.getElementById('response-box').innerHTML = `
-        <button id="correct-button" onclick="submitGuessResponse(true)">Correct</button>
-        <button id="incorrect-button" onclick="submitGuessResponse(false)">Incorrect</button>
+        <form id="stumped-form">
+            <label for="character-name">Your Character's Name:</label><br>
+            <input type="text" id="character-name" name="character-name"><br>
+            <label for="character-show">What show/film are they in?:</label><br>
+            <input type="text" id="character-show" name="character-show"><br>
+            <label for="new-question">What new question should I ask that is true for you?:</label><br>
+            <input type="text" id="new-question" name="new-question"><br>
+            <button type="submit" onclick="submitNewCharacter(event)">Submit</button>
+        </form>
     `;
+}
+
+function validateForm() {
+    const characterName = document.getElementById('character-name').value;
+    const characterShow = document.getElementById('character-show').value;
+    const newQuestion = document.getElementById('new-question').value;
+    
+    const allowedCharacters = /^[A-Za-z0-9 ,.!?'-]+$/;
+
+    if (!allowedCharacters.test(characterName)) {
+        alert("Character name contains invalid characters. Please avoid special characters like quotes.");
+        return false;
+    }
+    
+    if (!allowedCharacters.test(characterShow)) {
+        alert("Character show contains invalid characters. Please avoid special characters like quotes.");
+        return false;
+    }
+
+    if (!allowedCharacters.test(newQuestion)) {
+        alert("Question contains invalid characters. Please avoid special characters like quotes.");
+        return false;
+    }
+
+    return true;
 }
 
 function submitGuessResponse(isCorrect) {
@@ -76,21 +146,33 @@ function submitGuessResponse(isCorrect) {
     .then(data => {
         if (isCorrect) {
             document.getElementById('question-box').innerHTML = `<h2>Great! The game guessed correctly.</h2>`;
-            document.getElementById('response-box').innerHTML = '';  // Clear response buttons
+            displayNewGameButton();
         } else {
             document.getElementById('question-box').innerHTML = `<h2>You win! Add your character details below.</h2>`;
-            displayNewCharacterForm();
+            displayNewCharacterForm(character_guess, character_show);
         }
+    })
+    .catch(error => {
+        console.error('Error submitting guess response:', error);
     });
 }
 
-function displayNewCharacterForm() {
+function displayNewGameButton() {
     document.getElementById('response-box').innerHTML = `
+        <button id="new-game-button" onclick="startGame()">New Game</button>
+    `;
+}
+
+function displayNewCharacterForm(guessed_character, guessed_show) {
+    document.getElementById('response-box').innerHTML = `
+        <h3>I guessed that you are: ${guessed_character} from ${guessed_show}</h3>
         <form id="new-character-form">
-            <label for="character-name">Character Name:</label><br>
-            <input type="text" id="character-name" name="character-name" required><br>
-            <label for="new-question">New Question:</label><br>
-            <input type="text" id="new-question" name="new-question" required><br>
+            <label for="character-name">Your Character's Name:</label><br>
+            <input type="text" id="character-name" name="character-name"><br>
+            <label for="character-show">What show/film are they in?:</label><br>
+            <input type="text" id="character-show" name="character-show"><br>
+            <label for="new-question">What question is true for you but not ${guessed_character} from ${guessed_show}?:</label><br>
+            <input type="text" id="new-question" name="new-question"><br>
             <button type="submit" onclick="submitNewCharacter(event)">Submit</button>
         </form>
     `;
@@ -98,8 +180,14 @@ function displayNewCharacterForm() {
 
 function submitNewCharacter(event) {
     event.preventDefault();
+
+    if (!validateForm()) {
+        return;
+    }
+
     const characterName = document.getElementById('character-name').value;
     const newQuestion = document.getElementById('new-question').value;
+    const characterShow = document.getElementById('character-show').value;
 
     fetch('https://cmxsilzill.execute-api.us-east-1.amazonaws.com/dev/add_character3', {
         method: 'POST',
@@ -109,14 +197,21 @@ function submitNewCharacter(event) {
         body: JSON.stringify({
             character_name: characterName,
             new_question: newQuestion,
-            previous_character: character_guess  // Include the previously guessed character
+            character_show: characterShow,
+            session_id: session_id,
+            previous_character: character_guess
         })
     })
     .then(response => response.json())
     .then(data => {
         document.getElementById('question-box').innerHTML = `<h2>Thanks! Your character has been added.</h2>`;
         document.getElementById('response-box').innerHTML = '';  // Clear the form
+        displayNewGameButton();
+    })
+    .catch(error => {
+        console.error('Error adding new character or question:', error);
     });
 }
 
 window.onload = startGame;
+

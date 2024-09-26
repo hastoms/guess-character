@@ -98,6 +98,7 @@ VALUES
 (2, 2, 'No', 1),
 (3, 3, 'Probably', 1);
 
+select * from Character_Question_Map;
 select * from Characters;
 select * from Game_Sessions;
 select * from Questions;
@@ -109,6 +110,69 @@ show index from Questions;
 show grants for 'admin';
 INSERT INTO User_Answers (session_id, question_id, user_response, question_order) 
 VALUES (4, 1, 'Yes', 1);
+INSERT INTO User_Answers (session_id, question_id, user_response, question_order) 
+VALUES (50, 23, 'Yes', 1);
+UPDATE Questions SET yes_count = yes_count + 1, times_asked = times_asked + 1 WHERE question_id = 23;
+
+INSERT INTO Character_Question_Map (character_id, question_id, session_id, answer, weight, is_flagged, date_created, creating_player_id)
+                    VALUES (24, 23, 50, 'Yes', 1, 0, NOW(), 1);
+                    
+SELECT character_id, COUNT(*) as match_count
+                FROM Character_Question_Map 
+                WHERE question_id = 23 AND answer = 'Yes'
+                GROUP BY character_id
+                ORDER BY match_count DESC
+                LIMIT 5;
 
 DELETE FROM User_Answers
-WHERE answer_id = 4;
+WHERE answer_id = 6;
+
+SELECT c.character_id, c.character_name, COUNT(*) as match_score
+FROM Character_Question_Map cq
+JOIN Characters c ON cq.character_id = c.character_id
+WHERE cq.answer = 1  -- where the answer matches the user_response
+AND cq.question_id IN (
+  SELECT question_id FROM User_Answers WHERE session_id = 8 -- filter questions in this session
+)
+GROUP BY c.character_id
+ORDER BY match_score DESC
+LIMIT 1; -- Return the character with the highest match score
+
+SELECT * FROM User_Answers WHERE session_id = 4;
+
+delete from Characters where character_id = 25;
+
+-- Insert answers for session 62
+INSERT INTO User_Answers (session_id, question_id, user_response, question_order) VALUES
+(62, 1, 'Yes', 1),
+(62, 2, 'No', 2),
+(62, 3, 'Yes', 3),
+(62, 4, 'No', 4),
+(62, 5, 'Yes', 5),
+(62, 6, 'No', 6),
+(62, 7, 'Yes', 7),
+(62, 8, 'No', 8);
+
+INSERT INTO Questions (question_text, category, times_asked, yes_count, no_count, entropy_score, creating_player_id)
+VALUES
+('Are you close with your brother?', 'General', 0, 0, 0, 0, 1),
+('Do you live alone?', 'General', 0, 0, 0, 0, 1),
+('Do you have very bushy hair?', 'General', 0, 0, 0, 0, 1),
+('Do you like to fight monsters?', 'General', 0, 0, 0, 0, 1),
+('Do you live with your sister?', 'General', 0, 0, 0, 0, 1),
+('Do you have blond hair?', 'Appearance', 0, 0, 0, 0, 1),
+('Do you have dark hair?', 'Appearance', 0, 0, 0, 0, 1),
+('Do you live on an island?', 'Location', 0, 0, 0, 0, 1),
+('Do you live in the US?', 'Location', 0, 0, 0, 0, 1),
+('Are you human?', 'Species', 0, 0, 0, 0, 1),
+('Does your character have a gaming channel?', 'Occupation', 0, 0, 0, 0, 1),
+('Does your character have any kids?', 'Family', 0, 0, 0, 0, 1),
+('Is your character older than 18?', 'Age', 0, 0, 0, 0, 1),
+('Does your character create music?', 'Occupation', 0, 0, 0, 0, 1),
+('Did your character die?', 'Event', 0, 0, 0, 0, 1),
+('Is your character linked with sports?', 'Occupation', 0, 0, 0, 0, 1),
+('Is your character the main character of the work in which they appear?', 'Role', 0, 0, 0, 0, 1),
+('Is your character animated?', 'Appearance', 0, 0, 0, 0, 1),
+('Is your character from a show that has ended more than a year ago?', 'Show', 0, 0, 0, 0, 1),
+('Does your character have a beard?', 'Appearance', 0, 0, 0, 0, 1),
+('Is your character an “influencer” (on YouTube, TikTok, etc.)?', 'Occupation', 0, 0, 0, 0, 1);

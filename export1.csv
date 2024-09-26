@@ -1,0 +1,24 @@
+question_id,question_text,category,times_asked,yes_count,no_count,entropy_score,is_flagged,date_created,creating_player_id
+1,"Is the character male?",Gender,50,37,13,0.826746,0,"2024-09-07 20:58:28",1
+2,"Is the character from a TV show?",Category,11,7,4,0.94566,0,"2024-09-07 20:58:28",2
+3,"Does the character wear glasses?",Appearance,5,1,4,0.721928,0,"2024-09-07 20:58:28",3
+4,"Is the character male?",Gender,2,2,0,0,0,"2024-09-10 18:46:38",NULL
+5,"Is the character married?","Relationship Status",2,0,2,0,0,"2024-09-10 18:46:38",NULL
+6,"Is the character a parent?",Family,2,0,2,0,0,"2024-09-10 18:46:38",NULL
+7,"Does the character work in an office?",Work,1,0,1,0,0,"2024-09-10 18:46:38",NULL
+8,"Is the character a doctor?",Profession,1,0,1,0,0,"2024-09-10 18:46:38",NULL
+9,"Is the character a lawyer?",Profession,2,0,2,0,0,"2024-09-10 18:46:38",NULL
+10,"Does the character live in an apartment?","Living Situation",3,3,0,0,0,"2024-09-10 18:46:38",NULL
+11,"Does the character have a pet?",Personality,1,0,1,0,0,"2024-09-10 18:46:38",NULL
+12,"Is the character funny?",Personality,1,1,0,0,0,"2024-09-10 18:46:38",NULL
+13,"Is the character considered clumsy?",Personality,1,1,0,0,0,"2024-09-10 18:46:38",NULL
+14,"Does the character have children?",Family,1,0,1,0,0,"2024-09-10 18:46:38",NULL
+15,"Is the character in a romantic relationship?","Relationship Status",1,0,1,0,0,"2024-09-10 18:46:38",NULL
+16,"Does the character wear glasses?",Appearance,1,0,1,0,0,"2024-09-10 18:46:38",NULL
+17,"Does the character have a sibling?",Family,1,0,1,0,0,"2024-09-10 18:46:38",NULL
+18,"Is the character friends with the protagonist?",Relationships,1,1,0,0,0,"2024-09-10 18:46:38",NULL
+19,"Is the character single?","Relationship Status",1,1,0,0,0,"2024-09-10 18:46:38",NULL
+20,"Does the character have a unique catchphrase?",Personality,1,1,0,0,0,"2024-09-10 18:46:38",NULL
+21,"Does the character have a distinctive laugh?",Personality,1,1,0,0,0,"2024-09-10 18:46:38",NULL
+22,"Is the character known for being intelligent?",Personality,1,0,1,0,0,"2024-09-10 18:46:38",NULL
+23,"Is the character from New York?",Location,0,0,0,0,0,"2024-09-10 18:46:38",NULL
